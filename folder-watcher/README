@@ -1,0 +1,9 @@
+Parses the filename and extracts TV show name, season number (if not
+assumes 1) and episode number, then creates a symlink to the file in
+~/Movies/Plex so that Plex can scan and scrape the show info.
+
+  Usage: tvshow-symlinks.pl *.mp4
+
+Might be handy to run with Folder action AppleScript.
+
+

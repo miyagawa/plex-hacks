@@ -85,6 +85,5 @@ sub generate_link {
 sub normalize_series {
     my $name = shift;
     $name =~ s/^\s*|\s*$|-//g; # Plex doesn't like in series name apparently
-    $name =~ s/[\!\?]//g;
     return $name;
 }
