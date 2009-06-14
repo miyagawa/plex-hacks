@@ -33,9 +33,11 @@ sub parse_info {
         push @tags, $1;
     }
 
-    my $tag_re = '[\[\(\x{3010}]([^\)\]\x{3011}]*)[\)\]\x{3011}]';
-    while ( $base =~ s/^$tag_re\s*|\s*$tag_re\.?$// ) {
-        push @tags, split /\s+/, ($1 || $2);
+    my %pair = ('[' => ']', '(', => ')', "\x{3010}" => "\x{3011}");
+    my $tag_re = join "|", map { quotemeta($_) . "(.*?)" . quotemeta($pair{$_}) } keys %pair;
+
+    while ($base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$// ) {
+        push @tags, split /\s+/, ($1 || $2 || $3 || $4 || $5 || $6);
     }
 
     if ($base =~ s/\.(HR|[HP]DTV|WS|AAC|AC3|DVDRip|PROPER|DVDSCR|720p|1080p|[hx]264(?:-\w+)?|dd51)\.(.*)//i) {
