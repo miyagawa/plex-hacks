@@ -17,7 +17,7 @@ my $aliases = {};
 if (open my $fh, "<:utf8", "$ENV{HOME}/.plexshowaliases") {
     while (<$fh>) {
         chomp;
-        my($orig, $alias) = split /,/, $_, 2;
+        my($orig, $alias) = split /\,/, $_, 2;
         $aliases->{$orig} = $alias;
     }
 }
@@ -60,7 +60,7 @@ sub parse_info {
     $base =~ s/\s*[\x{300c}\x{ff62}].*?[\x{300d}\x{ff63}]\s*$//;
 
     for my $orig (keys %$aliases) {
-        $base =~ s/^$orig/$aliases->{$orig}/
+        $base =~ s/^$orig/$aliases->{$orig}/i
             and last;
     }
 
