@@ -69,7 +69,7 @@ sub parse_info {
         $info->{episode} = $1 + 0;
     } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
         $info->{episode} = $1 + 0;
-    } elsif ($base =~ s/\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
+    } elsif ($base =~ s/(?:\s+-)?\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
         $info->{episode} = $1 + 0;
     }
 
