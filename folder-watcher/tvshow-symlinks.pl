@@ -50,6 +50,8 @@ sub parse_info {
         push @tags, $1;
     }
 
+    $base =~ s/\s*(end|finale)\s*$//i;
+
     if ($base =~ s/\s*S(\d+)EP?(\d+)$//i) {
         return {
             series => $base,
