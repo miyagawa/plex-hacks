@@ -11,10 +11,21 @@ use Cwd;
 our $BaseDir = "$ENV{HOME}/Movies/Plex";
 mkdir $BaseDir, 0777 unless -e $BaseDir;
 
+if ($ARGV[0] eq '-t') { selftest() }
+
+my $aliases = {};
+if (open my $fh, "<:utf8", "$ENV{HOME}/.plexshowaliases") {
+    while (<$fh>) {
+        chomp;
+        my($orig, $alias) = split /,/, $_, 2;
+        $aliases->{$orig} = $alias;
+    }
+}
+
 my $current = cwd;
 for my $file (@ARGV) {
     $file = File::Spec->file_name_is_absolute($file) ? $file : "$current/$file";
-    if (my $info = parse_info($file)) {
+    if (my $info = parse_info($file, $aliases)) {
         generate_link($info, $file);
     } else {
         warn "Can't get info from $file\n";
@@ -23,6 +34,7 @@ for my $file (@ARGV) {
 
 sub parse_info {
     my $base = decode_utf8(basename(shift));
+    my $aliases = shift || {};
 
     my $ext;
     $base =~ s/\.(\w+)$/$ext = $1; ""/e;
@@ -55,33 +67,30 @@ sub parse_info {
 
     $base =~ s/\s*(end|finale)\s*$//i;
 
-    if ($base =~ s/\s*S(?:eason\s*)(\d+)EP?(\d+)\s*$//i) {
-        return {
-            series => $base,
-            season => $1,
-            episode => $2,
-        };
-    } elsif ($base =~ s/(\d+)?\s*ep(\d+)\s*$//i) {
-        return {
-            series => $base,
-            season => $1 || 1,
-            episode => $2,
-        };
-    } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
-        return {
-            series => $base,
-            season => 1,
-            episode => $1,
-        };
-    } elsif ($base =~ s/\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
-        return {
-            series => $base,
-            season => 1,
-            episode => $1,
-        };
+    for my $orig (keys %$aliases) {
+        $base =~ s/^$orig/$aliases->{$orig}/
+            and last;
     }
 
-    return;
+    my $info;
+    if ($base =~ s/\s*EP?(\d+)\s*$//i) {
+        $info->{episode} = $1 + 0;
+    } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
+        $info->{episode} = $1 + 0;
+    } elsif ($base =~ s/\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
+        $info->{episode} = $1 + 0;
+    }
+
+    if ($base =~ s/\s*(?:S(?:eason)?)?\s*(\d+)\d*$//) {
+        $info->{season} = $1 + 0;
+    }
+
+    return unless $info->{episode};
+
+    $info->{season} ||= 1;
+    $info->{series} = $base;
+
+    return $info;
 }
 
 sub generate_link {
@@ -102,3 +111,19 @@ sub normalize_series {
     $name =~ s/^\s*|\s*$|-//g; # Plex doesn't like in series name apparently
     return $name;
 }
+
+sub selftest {
+    eval "use Test::More";
+    plan('no_plan');
+    while (<DATA>) {
+        my $info = parse_info($_, { "Name Show" => "Show Name" });
+        is_deeply($info, {
+            series => "Show Name",
+            season => 1,
+            episode => 6,
+        });
+    }
+    exit;
+}
+
+__DATA__

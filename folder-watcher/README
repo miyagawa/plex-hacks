@@ -5,5 +5,3 @@ assumes 1) and episode number, then creates a symlink to the file in
   Usage: tvshow-symlinks.pl *.mp4
 
 Might be handy to run with Folder action AppleScript.
-
-
