@@ -73,7 +73,7 @@ sub parse_info {
         $info->{episode} = $1 + 0;
     }
 
-    if ($base =~ s/\s+(?:S(?:eason)?)?\s*(\d+)\d*$//) {
+    if ($base =~ s/\s+(?:S(?:eason)?)?\s*(\d+)\d*$//i) {
         $info->{season} = $1 + 0;
     }
 
@@ -110,15 +110,10 @@ sub trim {
 }
 
 sub selftest {
-    eval "use Test::More";
-    plan('no_plan');
+    use Data::Dumper;
     while (<DATA>) {
         my $info = parse_info($_, { "Name Show" => "Show Name" });
-        is_deeply($info, {
-            series => "Show Name",
-            season => 1,
-            episode => 6,
-        });
+        warn Dumper $info;
     }
     exit;
 }
