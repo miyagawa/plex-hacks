@@ -52,13 +52,13 @@ sub parse_info {
             season => $1,
             episode => $2,
         };
-    } elsif ($base =~ s/\s*ep(\d+)$//i) {
+    } elsif ($base =~ s/(\d+)\s*ep(\d+)$//i) {
         return {
             series => $base,
-            season => 1,
+            season => $1 || 1,
             episode => $1,
         };
-    } elsif ($base =~ s/\s+-\s+(\d+)$//) {
+    } elsif ($base =~ s/(?:\s+-)?\s+(\d+)$//) {
         return {
             series => $base,
             season => 1,
