@@ -68,7 +68,7 @@ sub parse_info {
     $base =~ s/\s*(end|finale|\(\x{7d42}\))\s*$//i;
 
     # strip episode title
-    $base =~ s/\s*\x{300c}.*?\x{300d}\s*$//;
+    $base =~ s/\s*[\x{300c}\x{ff62}].*?[\x{300d}\x{ff63}]\s*$//;
 
     for my $orig (keys %$aliases) {
         $base =~ s/^$orig/$aliases->{$orig}/
