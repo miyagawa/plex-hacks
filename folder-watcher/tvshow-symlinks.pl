@@ -84,7 +84,7 @@ sub parse_info {
         $info->{episode} = $1 + 0;
     }
 
-    if ($base =~ s/\s*(?:S(?:eason)?)?\s*(\d+)\d*$//) {
+    if ($base =~ s/\s+(?:S(?:eason)?)?\s*(\d+)\d*$//) {
         $info->{season} = $1 + 0;
     }
 
