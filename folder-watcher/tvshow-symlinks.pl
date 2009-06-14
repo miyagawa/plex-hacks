@@ -76,7 +76,7 @@ sub parse_info {
     }
 
     my $info;
-    if ($base =~ s/\s*EP?(\d+)\s*$//i) {
+    if ($base =~ s/\s*(?:EP?|\#)(\d+)\s*$//i) {
         $info->{episode} = $1 + 0;
     } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
         $info->{episode} = $1 + 0;
