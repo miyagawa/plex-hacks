@@ -28,8 +28,12 @@ sub parse_info {
 
     $base =~ s/_/ /g;
 
-    my $tag_re = '[\[\(\x{3010}]([^\)\]\x{3011}]*)[\)\]\x{3011}]';
     my @tags;
+    if ($base =~ s/\s+(RAW)$//i) {
+        push @tags, $1;
+    }
+
+    my $tag_re = '[\[\(\x{3010}]([^\)\]\x{3011}]*)[\)\]\x{3011}]';
     while ( $base =~ s/^$tag_re\s*|\s*$tag_re\.?$// ) {
         push @tags, split /\s+/, ($1 || $2);
     }
@@ -52,11 +56,11 @@ sub parse_info {
             season => $1,
             episode => $2,
         };
-    } elsif ($base =~ s/(\d+)\s*ep(\d+)$//i) {
+    } elsif ($base =~ s/(\d+)?\s*ep(\d+)$//i) {
         return {
             series => $base,
             season => $1 || 1,
-            episode => $1,
+            episode => $2,
         };
     } elsif ($base =~ s/(?:\s+-)?\s+(\d+)$//) {
         return {
