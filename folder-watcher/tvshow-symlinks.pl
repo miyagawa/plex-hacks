@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use Encode;
 use File::Basename qw(basename);
 use LWP::Simple;
 use File::Path;
@@ -21,7 +22,7 @@ for my $file (@ARGV) {
 }
 
 sub parse_info {
-    my $base = basename(shift);
+    my $base = decode_utf8(basename(shift));
 
     my $ext;
     $base =~ s/\.(\w+)$/$ext = $1; ""/e;
@@ -54,19 +55,25 @@ sub parse_info {
 
     $base =~ s/\s*(end|finale)\s*$//i;
 
-    if ($base =~ s/\s*S(\d+)EP?(\d+)$//i) {
+    if ($base =~ s/\s*S(?:eason\s*)(\d+)EP?(\d+)\s*$//i) {
         return {
             series => $base,
             season => $1,
             episode => $2,
         };
-    } elsif ($base =~ s/(\d+)?\s*ep(\d+)$//i) {
+    } elsif ($base =~ s/(\d+)?\s*ep(\d+)\s*$//i) {
         return {
             series => $base,
             season => $1 || 1,
             episode => $2,
         };
-    } elsif ($base =~ s/(?:\s+-)?\s+(\d+)$//) {
+    } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
+        return {
+            series => $base,
+            season => 1,
+            episode => $1,
+        };
+    } elsif ($base =~ s/\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
         return {
             series => $base,
             season => 1,
