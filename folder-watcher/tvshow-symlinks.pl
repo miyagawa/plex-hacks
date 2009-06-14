@@ -40,32 +40,21 @@ sub parse_info {
     $base =~ s/\.(\w+)$/$ext = $1; ""/e;
 
     $base =~ s/_/ /g;
-
-    my @tags;
-    if ($base =~ s/\s+(RAW)$//i) {
-        push @tags, $1;
-    }
+    $base =~ s/\s+(RAW)$//i;
+    trim($base);
 
     my %pair = ('[' => ']', '(', => ')', "\x{3010}" => "\x{3011}");
     my $tag_re = join "|", map { quotemeta($_) . "(.*?)" . quotemeta($pair{$_}) } keys %pair;
 
-    while ($base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$// ) {
-        push @tags, split /\s+/, ($1 || $2 || $3 || $4 || $5 || $6);
-    }
+    1 while $base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$//;
 
     if ($base =~ s/\.(HR|[HP]DTV|WS|AAC|AC3|DVDRip|PROPER|DVDSCR|720p|1080p|[hx]264(?:-\w+)?|dd51)\.(.*)//i) {
-        my $tags = "$1.$2";
         $base =~ s/\./ /g;
         # ad-hoc: rescue DD.MM.YY(YY)
         $base =~ s/(\d\d) (\d\d) (\d\d(\d\d)?)\b/$1.$2.$3/;
-        push @tags, split /\./, $tags;
     }
 
-    if ($base =~ s/\s+(RAW)$//i) {
-        push @tags, $1;
-    }
-
-    $base =~ s/\s*(end|finale|\(\x{7d42}\))\s*$//i;
+    1 while $base =~ s/\s*(RAW|end|finale|\(\x{7d42}\))\s*$//i;
 
     # strip episode title
     $base =~ s/\s*[\x{300c}\x{ff62}].*?[\x{300d}\x{ff63}]\s*$//;
@@ -91,7 +80,7 @@ sub parse_info {
     return unless $info->{episode};
 
     $info->{season} ||= 1;
-    $info->{series} = $base;
+    $info->{series} = trim($base);
 
     return $info;
 }
@@ -113,6 +102,11 @@ sub normalize_series {
     my $name = shift;
     $name =~ s/^\s*|\s*$|-//g; # Plex doesn't like in series name apparently
     return $name;
+}
+
+sub trim {
+    $_[0] =~ s/^\s*|\s*$//g;
+    $_[0];
 }
 
 sub selftest {
