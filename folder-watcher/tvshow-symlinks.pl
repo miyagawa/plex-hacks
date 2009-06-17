@@ -7,6 +7,7 @@ use LWP::Simple;
 use File::Path;
 use File::Spec;
 use Cwd;
+use Unicode::Normalize;
 
 our $BaseDir = "$ENV{HOME}/Movies/Plex";
 mkdir $BaseDir, 0777 unless -e $BaseDir;
@@ -33,7 +34,7 @@ for my $file (@ARGV) {
 }
 
 sub parse_info {
-    my $base = decode_utf8(basename(shift));
+    my $base = NFKC(decode_utf8(basename(shift)));
     my $aliases = shift || {};
 
     my $ext;
@@ -122,3 +123,4 @@ sub selftest {
 }
 
 __DATA__
+
