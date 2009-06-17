@@ -39,6 +39,9 @@ sub parse_info {
     my $ext;
     $base =~ s/\.(\w+)$/$ext = $1; ""/e;
 
+    my %want_ext = map { $_ => 1 } qw( avi mp4 divx m4v mov mkv flv wmv );
+    return unless $want_ext{lc $ext};
+
     $base =~ s/_/ /g;
     $base =~ s/\s+(RAW)$//i;
     trim($base);
