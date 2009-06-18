@@ -1,0 +1,16 @@
+Copy Remedie.bundle to ~/Library/Application Support/Plex Media Server/Plug-ins
+
+Remedie.bundle should work with localhost Remedie instance. Edit Contents/Code/__init__.py to change that.
+
+To see logs, enable logging by creating Advancedsettings.xml http://wiki.plexapp.com/index.php/Advancedsettings.xml and look at ~/Library/Logs/Plex.log and ~/Library/Logs/PMS Plugin Logs/com.plexapp.plugins.remedie.log
+
+Currently, this plugins supports plyback of simple web stream (Video podcasts with MP4/FLV etc.) and sites supported with Plex's Site Configuration files (like Hulu.com: see ~/Library/Application Support/Plex Media Server/Plug-ins/SiteConfiguration.bundle for the full list)
+
+TODO:
+* YouTube playback (Note supported with Site Configuration)
+* More web sites using Site Configuration
+* Thumbnails per channel
+* rtmp/mms playback
+* Audio/Photo feeds (only video items are supported)
+* Mark the videos watched on Remedie when played on Plex.app
+* etc., etc.
