@@ -18,7 +18,7 @@ my $aliases = {};
 if (open my $fh, "<:utf8", "$ENV{HOME}/.plexshowaliases") {
     while (<$fh>) {
         chomp;
-        my($orig, $alias) = split /\,/, $_, 2;
+        my($orig, $alias) = split ',', $_, 2;
         $aliases->{$orig} = $alias;
     }
 }
