@@ -27,7 +27,7 @@ my $current = cwd;
 for my $file (@ARGV) {
     $file = File::Spec->file_name_is_absolute($file) ? $file : "$current/$file";
     if (my $info = parse_info($file, $aliases)) {
-        generate_link($info, $file);
+        symlink $file, generate_link($info, $file);
     } else {
         warn "Can't get info from $file\n";
     }
@@ -50,7 +50,10 @@ sub parse_info {
     my %pair = ('[' => ']', '(', => ')', "\x{3010}" => "\x{3011}");
     my $tag_re = join "|", map { quotemeta($_) . "(.*?)" . quotemeta($pair{$_}) } keys %pair;
 
-    1 while $base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$//;
+    my @tags;
+    while ($base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$//) {
+        push @tags, $1 || $2 || $3 || $4 || $5 || $6;
+    }
 
     if ($base =~ s/\.(HR|[HP]DTV|WS|AAC|AC3|DVDRip|PROPER|DVDSCR|720p|1080p|[hx]264(?:-\w+)?|dd51)\.(.*)//i) {
         $base =~ s/\./ /g;
@@ -68,6 +71,8 @@ sub parse_info {
             and last;
     }
 
+    my $date_re = '(\d{2,4})[\.\x{5e74}](\d{2})[\.\x{6708}](\d{2})[\.\x{65e5}]?';
+    
     my $info;
     if ($base =~ s/\s*(?:EP?|\#)(\d+)\s*$//i) {
         $info->{episode} = $1 + 0;
@@ -75,13 +80,22 @@ sub parse_info {
         $info->{episode} = $1 + 0;
     } elsif ($base =~ s/(?:\s+-)?\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
         $info->{episode} = $1 + 0;
+    } elsif ($base =~ s/(?:\s+-)?\s*$date_re\s*$//) {
+        $info->{date} = [ $1, $2, $3 ];
+    } else {
+        for my $tag (@tags) {
+            if ($tag =~ /$date_re/) {
+                $info->{date} = [ $1, $2, $3 ];
+                last;
+            }
+        }
     }
 
     if ($base =~ s/\s+(?:S(?:eason)?)?\s*(\d+)\d*$//i) {
         $info->{season} = $1 + 0;
     }
 
-    return unless $info->{episode};
+    return unless $info->{episode} || $info->{date};
 
     $info->{season} ||= 1;
     $info->{series} = trim($base);
@@ -95,11 +109,17 @@ sub generate_link {
     my $ext = ($file =~ /\.(\w+)$/)[0];
     $info->{series} = normalize_series($info->{series});
 
-    my $path = "$BaseDir/$info->{series}/Season $info->{season}";
-    mkpath $path;
+    my($path, $link);
+    if ($info->{episode}) {
+        $path = "$BaseDir/$info->{series}/Season $info->{season}";
+        $link = sprintf "%s - S%02dE%02d.%s", $info->{series}, $info->{season}, $info->{episode}, $ext;
+    } elsif ($info->{date}) {
+        $info->{date}->[0] += 2000 if $info->{date}->[0] < 100;
+        $path = "$BaseDir/$info->{series}";
+        $link = sprintf "%s - %04d.%02d.%02d.%s", $info->{series}, @{$info->{date}}, $ext;
+    }
 
-    my $link = sprintf "%s/%s - S%02dE%02d.%s", $path, $info->{series}, $info->{season}, $info->{episode}, $ext;
-    symlink $file, $link;
+    return "$path/$link";
 }
 
 sub normalize_series {
@@ -118,9 +138,9 @@ sub selftest {
     while (<DATA>) {
         my $info = parse_info($_, { "Name Show" => "Show Name" });
         warn Dumper $info;
+        warn Dumper generate_link($info, $_, 1);
     }
     exit;
 }
 
 __DATA__
-
