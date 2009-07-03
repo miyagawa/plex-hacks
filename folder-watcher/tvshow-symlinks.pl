@@ -104,7 +104,7 @@ sub parse_info {
 }
 
 sub generate_link {
-    my($info, $file) = @_;
+    my($info, $file, $test) = @_;
 
     my $ext = ($file =~ /\.(\w+)$/)[0];
     $info->{series} = normalize_series($info->{series});
@@ -119,6 +119,7 @@ sub generate_link {
         $link = sprintf "%s - %04d.%02d.%02d.%s", $info->{series}, @{$info->{date}}, $ext;
     }
 
+    mkpath $path unless $test;
     return "$path/$link";
 }
 
@@ -140,7 +141,7 @@ sub selftest {
         warn Dumper $info;
         warn Dumper generate_link($info, $_, 1);
     }
-    exit;
+
 }
 
 __DATA__

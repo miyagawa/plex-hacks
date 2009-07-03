@@ -4,6 +4,7 @@ from PMS.FileTypes import PLS
 from PMS.Shorthand import _L, _R, _E, _D
 import re
 
+# TODO support Bonjour
 PLUGIN_PREFIX = "/video/remedie"
 FEED_URL = "http://localhost:10010/"
 
@@ -53,6 +54,7 @@ def HandleRequest(pathNouns, count):
       elif u'thumbnail' in dict[u'channel'][u'props']:
         thumb = dict[u'channel'][u'props'][u'thumbnail'][u'url']
       # TODO maybe special case YouTube
+      # TODO rtmp or mms seems not to work with Redirects
       if re.match('^video/', type):
         vidItem = VideoItem(id, e[u'name'], summary, duration, thumb)
       else:
