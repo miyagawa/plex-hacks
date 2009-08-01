@@ -29,7 +29,7 @@ for my $file (@ARGV) {
     if (my $info = parse_info($file, $aliases)) {
         my $link = generate_link($info, $file);
         symlink $file, $link;
-        warn "synlinked $link\n";
+        warn "symlinked $link\n";
     }
 }
 
