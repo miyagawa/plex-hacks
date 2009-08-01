@@ -27,9 +27,9 @@ my $current = cwd;
 for my $file (@ARGV) {
     $file = File::Spec->file_name_is_absolute($file) ? $file : "$current/$file";
     if (my $info = parse_info($file, $aliases)) {
-        symlink $file, generate_link($info, $file);
-    } else {
-        warn "Can't get info from $file\n";
+        my $link = generate_link($info, $file);
+        symlink $file, $link;
+        warn "synlinked $link\n";
     }
 }
 
