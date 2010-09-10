@@ -10,7 +10,11 @@ use Cwd;
 use Unicode::Normalize;
 
 our $BaseDir = "$ENV{HOME}/Movies/Plex";
-mkdir $BaseDir, 0777 unless -e $BaseDir;
+our $Uncategorized = "$ENV{HOME}/Movies/Uncategorized";
+
+for ($BaseDir, $Uncategorized) {
+    mkdir $_, 0777 unless -e $_;
+}        
 
 if ($ARGV[0] eq '-t') { selftest() }
 
@@ -28,6 +32,7 @@ for my $file (@ARGV) {
     $file = File::Spec->file_name_is_absolute($file) ? $file : "$current/$file";
     if (my $info = parse_info($file, $aliases)) {
         my $link = generate_link($info, $file);
+        unlink $link;
         symlink $file, $link;
         warn "symlinked $link\n";
     }
@@ -78,7 +83,7 @@ sub parse_info {
         $info->{episode} = $1 + 0;
     } elsif ($base =~ s/(?:\s+-)?\s+(\d+)\s*$//) {
         $info->{episode} = $1 + 0;
-    } elsif ($base =~ s/(?:\s+-)?\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{56de})\s*$//) {
+    } elsif ($base =~ s/(?:\s+-)?\s*\x{7b2c}(\d+)(?:\x{8a71}|\x{591c}|\x{56de})\s*$//) {
         $info->{episode} = $1 + 0;
     } elsif ($base =~ s/(?:\s+-)?\s*$date_re\s*$//) {
         $info->{date} = [ $1, $2, $3 ];
@@ -95,8 +100,6 @@ sub parse_info {
         $info->{season} = $1 + 0;
     }
 
-    return unless $info->{episode} || $info->{date};
-
     $info->{season} ||= 1;
     $info->{series} = trim($base);
 
@@ -107,7 +110,7 @@ sub generate_link {
     my($info, $file, $test) = @_;
 
     my $ext = ($file =~ /\.(\w+)$/)[0];
-    $info->{series} = normalize_series($info->{series});
+    $info->{series} = normalize_series($info->{series}) if $info->{series};
 
     my($path, $link);
     if ($info->{episode}) {
@@ -117,6 +120,9 @@ sub generate_link {
         $info->{date}->[0] += 2000 if $info->{date}->[0] < 100;
         $path = "$BaseDir/$info->{series}";
         $link = sprintf "%s - %04d.%02d.%02d.%s", $info->{series}, @{$info->{date}}, $ext;
+    } else {
+        $path = "$Uncategorized";
+        $link = File::Basename::basename($file);
     }
 
     mkpath $path unless $test;
@@ -125,7 +131,7 @@ sub generate_link {
 
 sub normalize_series {
     my $name = shift;
-    $name =~ s/^\s*|\s*$|-//g; # Plex doesn't like in series name apparently
+    $name =~ s/^\s*|\s*$//g; # Plex doesn't like in series name apparently
     return $name;
 }
 
