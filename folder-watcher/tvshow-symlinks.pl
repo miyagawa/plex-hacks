@@ -53,7 +53,7 @@ sub parse_info {
     trim($base);
 
     my %pair = ('[' => ']', '(', => ')', "\x{3010}" => "\x{3011}");
-    my $tag_re = join "|", map { quotemeta($_) . "(.*?)" . quotemeta($pair{$_}) } keys %pair;
+    my $tag_re = join "|", map { quotemeta($_) . "([^" . quotemeta($pair{$_}) . "]*?)" . quotemeta($pair{$_}) } keys %pair;
 
     my @tags;
     while ($base =~ s/^(?:$tag_re)\s*|\s*(?:$tag_re)\.?$//) {
@@ -76,7 +76,7 @@ sub parse_info {
             and last;
     }
 
-    my $date_re = '(\d{2,4})[\.\x{5e74}](\d{2})[\.\x{6708}](\d{2})[\.\x{65e5}]?';
+    my $date_re = '(\d{2,4})[\.\-\x{5e74}](\d{2})[\.\-\x{6708}](\d{2})[\.\x{65e5}]?';
     
     my $info;
     if ($base =~ s/\s*(?:EP?|\#)(\d+)\s*$//i) {
