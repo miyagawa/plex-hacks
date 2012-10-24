@@ -10,7 +10,7 @@ use Cwd;
 use Unicode::Normalize;
 
 our $BaseDir = "$ENV{HOME}/Movies/Plex";
-our $Uncategorized = "$ENV{HOME}/Movies/Uncategorized";
+our $Uncategorized = "$BaseDir/Uncategorized";
 
 for ($BaseDir, $Uncategorized) {
     mkdir $_, 0777 unless -e $_;
