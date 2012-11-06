@@ -10,11 +10,8 @@ use Cwd;
 use Unicode::Normalize;
 
 our $BaseDir = "$ENV{HOME}/Movies/Plex";
-our $Uncategorized = "$BaseDir/Uncategorized";
 
-for ($BaseDir, $Uncategorized) {
-    mkdir $_, 0777 unless -e $_;
-}        
+mkdir $BaseDir, 0777 unless -e $BaseDir;
 
 if ($ARGV[0] eq '-t') { selftest() }
 
@@ -31,7 +28,7 @@ my $current = cwd;
 for my $file (@ARGV) {
     $file = File::Spec->file_name_is_absolute($file) ? $file : "$current/$file";
     if (my $info = parse_info($file, $aliases)) {
-        my $link = generate_link($info, $file);
+        my $link = generate_link($info, $file) or next;
         unlink $link;
         symlink $file, $link;
         warn "symlinked $link\n";
@@ -121,8 +118,8 @@ sub generate_link {
         $path = "$BaseDir/$info->{series}";
         $link = sprintf "%s - %04d.%02d.%02d.%s", $info->{series}, @{$info->{date}}, $ext;
     } else {
-        $path = "$Uncategorized";
-        $link = File::Basename::basename($file);
+        warn "Didn't match any episode or date: $file";
+        return;
     }
 
     mkpath $path unless $test;

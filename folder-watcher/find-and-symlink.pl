@@ -4,13 +4,13 @@ use File::Find;
 
 my $now = time;
 
-my($watch, $linkdir, $age) = @ARGV;
+my($linkdir, $age, @watch) = @ARGV;
 $age ||= 3600 * 24 * 30;
 mkdir $linkdir, 0777 unless -e $linkdir;
 
 my %exists = map { ($_ => 1) } glob "$linkdir/*";
 
-find(\&want, $watch);
+find(\&want, @watch);
 
 for my $e (keys %exists) {
     unlink $e;
