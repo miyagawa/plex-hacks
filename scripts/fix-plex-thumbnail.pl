@@ -30,7 +30,7 @@ while ($xml =~ /<Video ratingKey="(\d+)"/g) {
             my $uri = URI->new("$plex_host/library/metadata/$id/poster");
             $uri->query_form(url => $posters[0]);
             my $res = $ua->put($uri);
-            print "---> Thumbanail changed to: ", $res->content, "\n";
+            print "---> Thumbnail changed to: ", $res->content, "\n";
         } else {
             warn "Could not find alternate thumbnails for $id\n";
         }
