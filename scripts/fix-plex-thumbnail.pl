@@ -10,7 +10,7 @@ my $ua = LWP::UserAgent->new;
 my $section = shift or die "Usage: fix-plex-thumbnail [section ID]\n";
 my $plex_host = shift || "http://localhost:32400";
 
-my $xml = $ua->get("$plex_host/library/sections/10/recentlyAdded")->content;
+my $xml = $ua->get("$plex_host/library/sections/$section/recentlyAdded")->content;
 while ($xml =~ /<Video ratingKey="(\d+)"/g) {
     my $id = $1;
     my $xml = $ua->get("$plex_host/library/metadata/$id/posters")->content;
