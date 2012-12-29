@@ -35,12 +35,12 @@ while ($xml =~ /<Video ratingKey="(\d+)"/g) {
     }
 
     if ($selected =~ /^metadata:/) {
-        print "---> Changing poster of $id to $posters[0]\n";
         if (@posters) {
+            print "---> Changing poster of $id to $posters[0]\n";
             my $uri = URI->new("$plex_host/library/metadata/$id/poster");
             $uri->query_form(url => $posters[0]);
             my $res = $ua->put($uri);
-            print "---> Thumbnail changed to: ", $res->content, "\n";
+            print "---> Thumbnail updated to: ", $res->content, "\n";
         } else {
             warn "Could not find alternate thumbnails for $id\n";
         }
